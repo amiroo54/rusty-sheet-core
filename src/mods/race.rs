@@ -1,4 +1,3 @@
-
 use crate::mods::{*};
 
 use serde::{Serialize, Deserialize};
@@ -12,12 +11,7 @@ pub struct Race
 
 impl Actionable for Race {
     fn get_actions(&self) -> Vec<&Action> {
-        let mut actions: Vec<&Action> = Vec::new();
-        for act in &self.actions
-        {
-            actions.push(&act);
-        }
-        actions
+        self.actions.iter().collect()
     }
 }
 
@@ -26,11 +20,7 @@ impl Default for Race {
         Self { id: Default::default(), name: Default::default(), actions: Default::default() }
     }
 }
-impl Default for &Race {
-    fn default() -> Self {
-        todo!()
-    }
-}
+
 
 impl Race
 {

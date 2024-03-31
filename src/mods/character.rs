@@ -3,7 +3,6 @@ use std::{collections::HashMap, vec};
 use crate::mods::{*};
 
 use serde::{Serialize, Deserialize};
-use serde_json;
 
 
 #[derive(Serialize, Deserialize, PartialEq)]
@@ -89,18 +88,8 @@ impl Character {
 
 }
 
-impl FileLoadable for Character {
-    fn get_json(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
-
-    fn load_from_json(json: &String) -> Self {
-        serde_json::from_str(json).unwrap()
-    }
-}
-
 impl Default for Character {
     fn default() -> Self {
-        Character::new(String::from(""), Race::new("".to_string()), Class::new("", Dice::D10), Stats::new())
+        Character::new(String::from(""), Race::new("".to_string()), Class::new("".to_string(), Dice::D10), Stats::new())
     }
 }

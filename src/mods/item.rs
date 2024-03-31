@@ -7,17 +7,12 @@ pub struct Item
 {
     pub id: Uuid,
     pub name: String,
-    
+    actions: Vec<Action>,
 }
 
-impl FileLoadable for Item
-{
-    fn get_json(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
-
-    fn load_from_json(json: &String) -> Self {
-        serde_json::from_str(json).unwrap()
+impl Actionable for Item {
+    fn get_actions(&self) -> Vec<&Action> {
+        self.actions.iter().collect()
     }
 }
 
@@ -28,7 +23,8 @@ impl Item
         Item
         {
             id: Uuid::new_v4(),
-            name
+            name,
+            actions: Vec::new()
         }
     }
 }

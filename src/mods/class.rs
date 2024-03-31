@@ -10,16 +10,6 @@ pub struct Class
     pub actions: Vec<Action>
 }
 
-impl FileLoadable for Class
-{
-    fn get_json(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
-
-    fn load_from_json(json: &String) -> Self {
-        serde_json::from_str(json).unwrap()
-    }
-}
 
 impl Default for Class {
     fn default() -> Self {
@@ -35,12 +25,12 @@ impl Default for Class {
 
 impl Class
 {
-    pub fn new(name: &str, dice: Dice) -> Self
+    pub fn new(name: String, dice: Dice) -> Self
     {
         Class 
         {
             id: Uuid::new_v4(),
-            name: String::from(name),
+            name: name,
             hit_die: dice,
             actions: Vec::new(),
         }
@@ -64,7 +54,10 @@ impl Actionable for PlayerClass
         let mut actions: Vec<&Action> = Vec::new();
         for act in &self.class.actions
         {
-            actions.push(&act);
+            if act.lvl <= self.lvl
+            {
+                actions.push(&act);
+            }
         }
         actions
     }
