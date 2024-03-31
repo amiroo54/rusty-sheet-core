@@ -25,13 +25,13 @@ impl Default for Class {
 
 impl Class
 {
-    pub fn new(name: String, dice: Dice) -> Self
+    pub fn new(name: String, hit_die: Dice) -> Self
     {
         Class 
         {
             id: Uuid::new_v4(),
             name: name,
-            hit_die: dice,
+            hit_die,
             actions: Vec::new(),
         }
     }
@@ -41,9 +41,12 @@ impl Class
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct PlayerClass
 {
-    pub class_id: Uuid,
     #[serde(skip_serializing, skip_deserializing)]
     pub class: Class, 
+    pub class_id: Uuid,
+    pub sub_class_id: Uuid,
+    #[serde(skip_serializing, skip_deserializing)]
+    pub sub_class: Option<Class>,
     pub lvl: u8,
 }
 
@@ -70,6 +73,8 @@ impl PlayerClass {
         {
             class_id: class.id.clone(),
             class, 
+            sub_class_id: Uuid::nil(),
+            sub_class: None,
             lvl: 1
         }
     }
