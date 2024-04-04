@@ -1,3 +1,5 @@
+use core::str;
+
 use crate::mods::{*};
 
 use serde::{Serialize, Deserialize};
@@ -7,7 +9,10 @@ pub struct Class
     pub id: Uuid,
     pub name: String,
     pub hit_die: Dice,
-    pub actions: Vec<Action>
+    pub actions: Vec<Action>,
+    pub subclass_lvl: u8,
+    #[serde(skip_deserializing, skip_serializing)]
+    pub subclasses: Vec<&'static SubClass>
 }
 
 
@@ -18,14 +23,16 @@ impl Default for Class {
             name: "".to_string(),
             id: Uuid::nil(),
             hit_die: Dice::D4,
-            actions: Vec::new()
+            actions: Vec::new(), 
+            subclass_lvl: 1,
+            subclasses: Vec::new(),
         }
     }
 }
 
 impl Class
 {
-    pub fn new(name: String, hit_die: Dice) -> Self
+    pub fn new(name: String, hit_die: Dice, subclass_lvl: u8) -> Self
     {
         Class 
         {
@@ -33,9 +40,33 @@ impl Class
             name: name,
             hit_die,
             actions: Vec::new(),
+            subclass_lvl,
+            subclasses: Vec::new()
         }
     }
 
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
+pub struct SubClass
+{
+    pub class_id: Uuid,
+    pub id: Uuid,
+    pub name: String,
+    pub actions: Vec<Action>
+}
+
+impl SubClass {
+    pub fn new(name: String, class_id: Uuid) -> Self
+    {
+        SubClass
+        {
+            class_id, 
+            id: Uuid::new_v4(),
+            name,
+            actions: Vec::new()
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -46,7 +77,7 @@ pub struct PlayerClass
     pub class_id: Uuid,
     pub sub_class_id: Uuid,
     #[serde(skip_serializing, skip_deserializing)]
-    pub sub_class: Option<Class>,
+    pub sub_class: Option<SubClass>,
     pub lvl: u8,
 }
 
@@ -62,6 +93,16 @@ impl Actionable for PlayerClass
                 actions.push(&act);
             }
         }
+        if let Some(sub_class) = &self.sub_class
+        {
+            for act in &sub_class.actions
+            {
+                if act.lvl <= self.lvl
+                {
+                    actions.push(act);
+                }
+            }
+        } 
         actions
     }
 }
@@ -77,5 +118,29 @@ impl PlayerClass {
             sub_class: None,
             lvl: 1
         }
+    }
+
+    pub fn lvl_up(&mut self) -> Vec<Choice>
+    {
+        self.lvl += 1;
+        let mut choices: Vec<Choice> = Vec::new();
+        if self.lvl == self.class.subclass_lvl
+        {
+            for subclass in &self.class.subclasses
+            {
+                let choice = Choice
+                {
+                    description: subclass.name.clone(),
+                    effect: |char| 
+                    {
+                        
+                    },
+                };
+
+                choices.push(choice);
+            }   
+        }
+
+        choices
     }
 }

@@ -90,6 +90,6 @@ impl Character {
 
 impl Default for Character {
     fn default() -> Self {
-        Character::new(String::from(""), Race::new("".to_string()), Class::new("".to_string(), Dice::D10), Stats::new())
+        Character::new(String::from(""), Race::new("".to_string()), Class::new("".to_string(), Dice::D10, 1), Stats::new())
     }
 }

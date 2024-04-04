@@ -1,51 +1,59 @@
 mod tests {
-    use std::{collections::HashMap, env::temp_dir};
+    use std::{collections::HashMap, env::temp_dir, fs};
 
     use rusty_sheet_core::*;
     #[test]
     fn test_character_creation() {
         let race = Race::new("Elf".to_string());
-        let starting_class = Class::new("Warrior".to_string(), Dice::D8);
+        let starting_class = Class::new("Fighter".to_string(), Dice::D8, 3);
         let base_stats = Stats::new();
 
         let character = Character::new("Winston".to_string(), race, starting_class, base_stats);
         
         assert_eq!(character.name, "Winston");
         assert_eq!(character.race.name, "Elf");
-        assert_eq!(character.classes[0].class.name, "Warrior");
+        assert_eq!(character.classes[0].class.name, "Fighter");
         assert_eq!(character.base_stat.strength, 10);
         assert_eq!(character.base_stat.dexterity, 10);
     }
 
     #[test]
     fn test_save_load_json() {
-        let temp_dir = temp_dir();
-        println!("{}", &temp_dir.to_str().unwrap());
+        let temp_dir = temp_dir().join("RustySheet");
+
+        if !fs::metadata(&temp_dir).is_ok() {
+            fs::create_dir(&temp_dir);
+        }
+
 
         let mut race_list: HashMap<Uuid, Race> = HashMap::new();
         let mut class_list: HashMap<Uuid, Class> = HashMap::new();
         let mut item_list: HashMap<Uuid, Item> = HashMap::new();
+        let mut subclass_list: HashMap<Uuid, SubClass> = HashMap::new();
         let mut character_list: HashMap<Uuid, Character> = HashMap::new();
 
         let race = Race::new("Dwarf".to_string());
-        let starting_class = Class::new("Rogue".to_string(), Dice::D6);
+        let starting_class = Class::new("Rogue".to_string(), Dice::D6, 3);
         let item = Item::new("Greataxe".to_string());
+        let subclass = SubClass::new("Thief".to_string(), starting_class.id.clone());
         let base_stats = Stats::new();
         let character = Character::new("Mobin".to_string(), race.clone(), starting_class.clone(), base_stats);
-
+        
         race_list.insert(race.id, race);
         class_list.insert(starting_class.id, starting_class);
         item_list.insert(item.id, item);
+        subclass_list.insert(subclass.id, subclass);
         character_list.insert(character.id, character);
 
-        save_file(&temp_dir, &race_list, &class_list, &item_list, &character_list);
+        save_file(&temp_dir.join("Player's Handbook.sh"), &race_list, &class_list, &item_list, &subclass_list);
+        save_characters(&temp_dir.join("characters.char"), &character_list);
 
         let mut loaded_race_list: HashMap<Uuid, Race> = HashMap::new();
         let mut loaded_class_list: HashMap<Uuid, Class> = HashMap::new();
         let mut loaded_item_list: HashMap<Uuid, Item> = HashMap::new();
         let mut loaded_character_list: HashMap<Uuid, Character> = HashMap::new();
 
-        load_file(&temp_dir, &mut loaded_race_list, &mut loaded_class_list, &mut loaded_item_list, &mut loaded_character_list);
+        load_files(&temp_dir, &mut loaded_race_list, &mut loaded_class_list, &mut loaded_item_list, &mut subclass_list, &mut loaded_character_list);
 
         assert!(compare_hashmaps(&race_list, &loaded_race_list));
         assert!(compare_hashmaps(&class_list, &loaded_class_list));
@@ -87,7 +95,7 @@ mod tests {
         race_actions.push(Action::new("Mask of the Wild. You can attempt to hide even when you are only lightly obscured by foliage, heavy rain, falling snow, mist, and other natural phenomena.".to_string(), 1, ActionType::Trait));
         race.actions = race_actions;
         
-        let mut class = Class::new("Druid".to_string(), Dice::D8);
+        let mut class = Class::new("Druid".to_string(), Dice::D8, 2);
         let mut class_actions = Vec::<Action>::new();
         class_actions.push(Action::new("You know Druidic, the secret language of druids. You can speak the language and use it to leave hidden messages. You and others who know this language automatically spot such a message. Others spot the message's presence with a successful DC 15 Wisdom (Perception) check but can't decipher it without magic.".to_string(), 1, ActionType::Trait));
         class_actions.push(Action::new("Starting at 2nd level, you can use your action to magically assume the shape of a beast that you have seen before. You can use this feature twice. You regain expended uses when you finish a short or long rest.".to_string(), 2, ActionType::Action));
