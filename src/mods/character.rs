@@ -85,7 +85,17 @@ impl Character {
     {
         todo!()
     }
-
+    pub fn get_class_for_id(&mut self, id: &Uuid) -> Option<&mut Class>
+    {
+        for class in &mut self.classes
+        {
+            if class.class_id == *id
+            {
+                return Some(&mut class.class)
+            }
+        }
+        None
+    }
 }
 
 impl Default for Character {

@@ -22,43 +22,34 @@ mod tests {
         let temp_dir = temp_dir().join("RustySheet");
 
         if !fs::metadata(&temp_dir).is_ok() {
-            fs::create_dir(&temp_dir);
+            let _ = fs::create_dir(&temp_dir);
         }
 
 
-        let mut race_list: HashMap<Uuid, Race> = HashMap::new();
-        let mut class_list: HashMap<Uuid, Class> = HashMap::new();
-        let mut item_list: HashMap<Uuid, Item> = HashMap::new();
-        let mut subclass_list: HashMap<Uuid, SubClass> = HashMap::new();
-        let mut character_list: HashMap<Uuid, Character> = HashMap::new();
+        let mut data = Data::new();
 
         let race = Race::new("Dwarf".to_string());
-        let starting_class = Class::new("Rogue".to_string(), Dice::D6, 3);
-        let item = Item::new("Greataxe".to_string());
+        let mut starting_class = Class::new("Rogue".to_string(), Dice::D6, 3);
         let subclass = SubClass::new("Thief".to_string(), starting_class.id.clone());
+        starting_class.subclasses.push(subclass);
+        let item = Item::new("Greataxe".to_string());
         let base_stats = Stats::new();
         let character = Character::new("Mobin".to_string(), race.clone(), starting_class.clone(), base_stats);
-        
-        race_list.insert(race.id, race);
-        class_list.insert(starting_class.id, starting_class);
-        item_list.insert(item.id, item);
-        subclass_list.insert(subclass.id, subclass);
-        character_list.insert(character.id, character);
 
-        save_file(&temp_dir.join("Player's Handbook.sh"), &race_list, &class_list, &item_list, &subclass_list);
-        save_characters(&temp_dir.join("characters.char"), &character_list);
+        data.race_list.insert(race.id, race);
+        data.class_list.insert(starting_class.id, starting_class);
+        data.item_list.insert(item.id, item);
+        data.character_list.insert(character.id, character);
 
-        let mut loaded_race_list: HashMap<Uuid, Race> = HashMap::new();
-        let mut loaded_class_list: HashMap<Uuid, Class> = HashMap::new();
-        let mut loaded_item_list: HashMap<Uuid, Item> = HashMap::new();
-        let mut loaded_character_list: HashMap<Uuid, Character> = HashMap::new();
+        data.save_file(&temp_dir.join("Player's Handbook.sheet"));
+        data.save_characters(&temp_dir.join("characters.char"));
 
-        load_files(&temp_dir, &mut loaded_race_list, &mut loaded_class_list, &mut loaded_item_list, &mut subclass_list, &mut loaded_character_list);
+        let loaded_data = Data::load_files(&temp_dir);
 
-        assert!(compare_hashmaps(&race_list, &loaded_race_list));
-        assert!(compare_hashmaps(&class_list, &loaded_class_list));
-        assert!(compare_hashmaps(&item_list, &loaded_item_list));
-        assert!(compare_hashmaps(&character_list, &loaded_character_list));
+        assert!(compare_hashmaps(&data.race_list, &loaded_data.race_list));
+        assert!(compare_hashmaps(&data.class_list, &loaded_data.class_list));
+        assert!(compare_hashmaps(&data.item_list, &loaded_data.item_list));
+        assert!(compare_hashmaps(&data.character_list, &loaded_data.character_list));
         
     }
 
@@ -102,11 +93,39 @@ mod tests {
         class.actions = class_actions;
         
         let mut character = Character::new("Fox".to_string(), race, class, Stats::new());
-
+        character.classes[0].lvl_up();
         assert_eq!(character.get_possible_actions().len(), 3);
     
         character.classes[0].lvl = 2;
         assert_eq!(character.get_possible_actions().len(), 4);
     }
 
+
+    #[test]
+    fn lvl_up_test()
+    {
+        let race = Race::new("Dragonborn".to_string());
+        let mut starting_class = Class::new("Paladin".to_string(), Dice::D8, 3);
+        let subclass_1: SubClass = SubClass::new("Devotion".to_string(), starting_class.id.clone());
+        let subclass_2: SubClass = SubClass::new("Oathbreaker".to_string(), starting_class.id.clone());
+        starting_class.subclasses.push(subclass_1);
+        starting_class.subclasses.push(subclass_2);
+        
+        let base_stats = Stats::new();
+
+        let mut character = Character::new("Winston".to_string(), race, starting_class, base_stats);
+        
+
+        let first_choices = character.classes[0].lvl_up();
+        assert_eq!(character.classes[0].lvl, 1);
+        let second_choices = character.classes[0].lvl_up();
+        assert_eq!(character.classes[0].lvl, 2);        
+        let third_choices = character.classes[0].lvl_up();
+        assert_eq!(character.classes[0].lvl, 3);
+
+        assert_eq!(first_choices.len(), 0);
+        assert_eq!(second_choices.len(), 0);
+        assert_eq!(third_choices.len(), 2);
+        
+    }
 }

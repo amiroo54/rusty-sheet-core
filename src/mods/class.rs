@@ -12,7 +12,7 @@ pub struct Class
     pub actions: Vec<Action>,
     pub subclass_lvl: u8,
     #[serde(skip_deserializing, skip_serializing)]
-    pub subclasses: Vec<&'static SubClass>
+    pub subclasses: Vec<SubClass>
 }
 
 
@@ -116,7 +116,7 @@ impl PlayerClass {
             class, 
             sub_class_id: Uuid::nil(),
             sub_class: None,
-            lvl: 1
+            lvl: 0
         }
     }
 
@@ -131,7 +131,7 @@ impl PlayerClass {
                 let choice = Choice
                 {
                     description: subclass.name.clone(),
-                    effect: |char| 
+                    effect: |_char| 
                     {
                         
                     },
