@@ -6,6 +6,7 @@ pub struct Race
 {
     pub id: Uuid,
     pub name: String,
+    pub decription: String,
     pub actions: Vec<Action>
 }
 
@@ -17,7 +18,7 @@ impl Actionable for Race {
 
 impl Default for Race {
     fn default() -> Self {
-        Self { id: Default::default(), name: Default::default(), actions: Default::default() }
+        Self { id: Default::default(), name: Default::default(), decription: Default::default(), actions: Default::default() }
     }
 }
 
@@ -29,6 +30,7 @@ impl Race
         Race {
             id: Uuid::new_v4(),
             name,
+            decription: "".to_string(),
             actions: Vec::new()
         }
     }

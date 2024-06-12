@@ -85,13 +85,13 @@ impl Character {
     {
         todo!()
     }
-    pub fn get_class_for_id(&mut self, id: &Uuid) -> Option<&mut Class>
+    pub fn get_class(&mut self, id: &Uuid) -> Option<&mut PlayerClass>
     {
         for class in &mut self.classes
         {
-            if class.class_id == *id
+            if class.class_id == id.clone()
             {
-                return Some(&mut class.class)
+                return Some(class);
             }
         }
         None

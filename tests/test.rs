@@ -30,8 +30,7 @@ mod tests {
 
         let race = Race::new("Dwarf".to_string());
         let mut starting_class = Class::new("Rogue".to_string(), Dice::D6, 3);
-        let subclass = SubClass::new("Thief".to_string(), starting_class.id.clone());
-        starting_class.subclasses.push(subclass);
+        let subclass = starting_class.create_subclass("Thief".to_string());
         let item = Item::new("Greataxe".to_string());
         let base_stats = Stats::new();
         let character = Character::new("Mobin".to_string(), race.clone(), starting_class.clone(), base_stats);
@@ -106,10 +105,8 @@ mod tests {
     {
         let race = Race::new("Dragonborn".to_string());
         let mut starting_class = Class::new("Paladin".to_string(), Dice::D8, 3);
-        let subclass_1: SubClass = SubClass::new("Devotion".to_string(), starting_class.id.clone());
-        let subclass_2: SubClass = SubClass::new("Oathbreaker".to_string(), starting_class.id.clone());
-        starting_class.subclasses.push(subclass_1);
-        starting_class.subclasses.push(subclass_2);
+        starting_class.create_subclass("Devotion".to_string());
+        starting_class.create_subclass("Oathbreaker".to_string());
         
         let base_stats = Stats::new();
 
@@ -125,7 +122,29 @@ mod tests {
 
         assert_eq!(first_choices.len(), 0);
         assert_eq!(second_choices.len(), 0);
-        assert_eq!(third_choices.len(), 2);
+        assert_eq!(third_choices.len(), 1);
+        assert_eq!(third_choices[0].options.len(), 2)
+        
+    }
+
+    #[test]
+    fn choice_test()
+    {
+        let dragonborn = Race::new("Dragonborn".to_string());
+        let warforged = Race::new("Warforged".to_string());
+        let mut clreic = Class::new("cleric".to_string(), Dice::D8, 1);
+        let forge = clreic.create_subclass("Forge domain".to_string());
+        let life = clreic.create_subclass("Life domain".to_string());
+    
+        let mut data = Data::new();
+        data.race_list.insert(dragonborn.id, dragonborn);
+        data.race_list.insert(warforged.id, warforged);
+        data.class_list.insert(clreic.id, clreic);
+
+        let options = data.get_race_options();
+        assert_eq!(options.options.len(), 2);
+
+        
         
     }
 }

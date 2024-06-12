@@ -1,5 +1,5 @@
 use crate::mods::{*};
-
+use crate::Data;
 pub trait Actionable
 {
     fn get_actions(&self) -> Vec<&Action>;
@@ -18,5 +18,22 @@ pub trait Choicable
 pub struct Choice
 {
     pub description: String, 
-    pub effect: fn(&mut Character)
+    pub options: Vec<ChoiceOption>
+}
+
+pub struct ChoiceOption
+{
+    pub description: String,
+    pub effect: Box<dyn FnOnce(&mut Character)>
+}
+
+impl Choice {
+    pub fn new(description: String) -> Self
+    {
+        Choice
+        {
+            description,
+            options: vec![]
+        }
+    }
 }

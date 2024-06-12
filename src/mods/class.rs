@@ -1,6 +1,7 @@
 use core::str;
+use std::{collections::HashMap, hash::Hash};
 
-use crate::mods::{*};
+use crate::{mods::*, Data};
 
 use serde::{Serialize, Deserialize};
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -12,7 +13,7 @@ pub struct Class
     pub actions: Vec<Action>,
     pub subclass_lvl: u8,
     #[serde(skip_deserializing, skip_serializing)]
-    pub subclasses: Vec<SubClass>
+    pub subclasses: HashMap<Uuid, SubClass>
 }
 
 
@@ -25,7 +26,7 @@ impl Default for Class {
             hit_die: Dice::D4,
             actions: Vec::new(), 
             subclass_lvl: 1,
-            subclasses: Vec::new(),
+            subclasses: HashMap::new(),
         }
     }
 }
@@ -41,8 +42,22 @@ impl Class
             hit_die,
             actions: Vec::new(),
             subclass_lvl,
-            subclasses: Vec::new()
+            subclasses: HashMap::new()
         }
+    }
+
+    pub fn create_subclass(&mut self, name: String) -> Uuid
+    {
+        let id = Uuid::new_v4();
+        let s = SubClass
+        {
+            class_id: self.id.clone(),
+            id: id.clone(),
+            name,
+            actions: Vec::new(),
+        };
+        self.subclasses.insert(s.id.clone(), s);
+        id
     }
 
 }
@@ -56,18 +71,6 @@ pub struct SubClass
     pub actions: Vec<Action>
 }
 
-impl SubClass {
-    pub fn new(name: String, class_id: Uuid) -> Self
-    {
-        SubClass
-        {
-            class_id, 
-            id: Uuid::new_v4(),
-            name,
-            actions: Vec::new()
-        }
-    }
-}
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct PlayerClass
@@ -123,22 +126,29 @@ impl PlayerClass {
     pub fn lvl_up(&mut self) -> Vec<Choice>
     {
         self.lvl += 1;
-        let mut choices: Vec<Choice> = Vec::new();
+        let mut choices = vec![];
         if self.lvl == self.class.subclass_lvl
         {
-            for subclass in &self.class.subclasses
+            let mut subclass_choice: Choice = Choice::new("Choose your subclass".to_string());
+            for subclass in self.class.subclasses.clone()
             {
-                let choice = Choice
+                let binding = subclass.clone();
+                let id = self.class_id.clone();
+                let effect = move |char: &mut Character| 
                 {
-                    description: subclass.name.clone(),
-                    effect: |_char| 
-                    {
-                        
-                    },
+                    let class = char.get_class(&id).unwrap();
+                    class.sub_class_id = binding.0.clone();
+                    class.sub_class = Some(binding.1);
+                    
                 };
-
-                choices.push(choice);
+                let option = ChoiceOption
+                {
+                    description: subclass.1.name.clone(),
+                    effect: Box::new(effect)
+                };
+                subclass_choice.options.push(option);
             }   
+            choices.push(subclass_choice);
         }
 
         choices

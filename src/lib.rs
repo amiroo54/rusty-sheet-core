@@ -2,7 +2,7 @@ pub mod mods;
 pub use mods::{*};
 use serde_json::json;
 
-use std::{collections::hash_map::HashMap, fs::{self, File}, io::{BufReader, Write}, path::Path};
+use std::{collections::hash_map::HashMap, fs::{self, File}, io::{BufReader, Write}, ops::BitAndAssign, path::Path};
 
 
 pub struct Data
@@ -49,7 +49,7 @@ impl Data {
                     data.class_list
                     .get_mut(&sub.1.class_id)
                     .unwrap()
-                    .subclasses.push(sub.1);
+                    .subclasses.insert(sub.0.clone(), sub.1);
                 }
             }
 
@@ -75,7 +75,7 @@ impl Data {
         {
             for sub in &class.1.subclasses
             {
-                subclass_list.insert(sub.id, sub.clone());
+                subclass_list.insert(sub.0.clone(), sub.1.clone());
             }
         }
         
@@ -86,8 +86,6 @@ impl Data {
         let mut file = File::create(path).expect("File creation failed");
         file.write_all(serde_json::to_string_pretty(&json_data).unwrap().as_bytes()).expect("Writing to file failed");
     }
-
-
 
     pub fn save_characters(&self, path: &Path)
     {
@@ -115,5 +113,24 @@ impl Data {
             }
         }
         data
+    }
+
+    pub fn get_race_options(&self) -> Choice
+    {
+        let mut choice = Choice::new("Race".to_string());
+        for race in &self.race_list {
+            let binding = race.clone().1.clone();
+            let effect = |char: &mut Character|
+            {
+                char.race = binding;
+            };
+            let opt = ChoiceOption
+            {
+                description: race.1.decription.clone(),
+                effect: Box::new(effect)  
+            };
+            choice.options.push(opt);
+        }
+        choice
     }
 }
