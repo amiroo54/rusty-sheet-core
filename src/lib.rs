@@ -57,7 +57,7 @@ impl Data {
                 let mut character_list: HashMap<Uuid, Character> = serde_json::from_value(characters.clone()).expect("Unable to parse characters data");
                 for character in character_list.iter_mut()
                 {
-                    character.1.populate_from_ids(&data.class_list, &data.race_list, &data.item_list);
+                    character.1.populate_from_ids(&data);
                 }
                 data.character_list = character_list;
             }
@@ -122,11 +122,31 @@ impl Data {
             let binding = race.clone().1.clone();
             let effect = |char: &mut Character|
             {
-                char.race = binding;
+                char.race = Some(binding);
             };
             let opt = ChoiceOption
             {
-                description: race.1.decription.clone(),
+                description: race.1.description.clone(),
+                effect: Box::new(effect)  
+            };
+            choice.options.push(opt);
+        }
+        choice
+    }
+
+    pub fn get_class_options(&self) -> Choice
+    {
+        let mut choice = Choice::new("Class".to_string());
+        for class in &self.class_list {
+            let binding = class.1.clone();
+            let effect = |char: &mut Character|
+            {
+                let pc = PlayerClass::new(binding);
+                char.classes.push(pc);
+            };
+            let opt = ChoiceOption
+            {
+                description: class.1.name.clone(),
                 effect: Box::new(effect)  
             };
             choice.options.push(opt);

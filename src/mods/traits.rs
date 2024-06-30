@@ -36,4 +36,9 @@ impl Choice {
             options: vec![]
         }
     }
+
+    pub fn apply_option(&mut self, character: &mut Character, index: usize)
+    {
+        (self.options.remove(index).effect)(character);
+    }
 }
