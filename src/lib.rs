@@ -2,9 +2,11 @@ pub mod mods;
 pub use mods::{*};
 use serde_json::json;
 
-use std::{collections::hash_map::HashMap, fs::{self, File}, io::{BufReader, Write}, ops::BitAndAssign, path::Path};
+use std::{collections::hash_map::HashMap, fs::{self, File}, io::{BufReader, Write}, path::Path};
 
 
+///    The building block of this library. 
+///   Holds all the relevant info like races, classes, items and characters.
 pub struct Data
 {
     pub race_list: HashMap<Uuid, Race>,
@@ -13,6 +15,7 @@ pub struct Data
     pub character_list: HashMap<Uuid, Character>,
 }
 impl Data {
+    /// Creates a new instance of Data struct.
     pub fn new() -> Self
     {
         Data
@@ -23,6 +26,7 @@ impl Data {
             character_list: HashMap::new()
         }
     }
+    /// Loads a single file made with save_file into the `data` variable.
     fn load_file(path: &Path, data: &mut Data)
     {
         if let Ok(file) = File::open(&path) {

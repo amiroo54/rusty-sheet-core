@@ -1,7 +1,7 @@
 use core::str;
-use std::{collections::HashMap, hash::Hash};
+use std::collections::HashMap;
 
-use crate::{mods::*, Data};
+use crate::mods::*;
 
 use serde::{Serialize, Deserialize};
 #[derive(Serialize, Deserialize, Clone, PartialEq)]

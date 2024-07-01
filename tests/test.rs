@@ -35,9 +35,8 @@ mod tests {
 
         let race = Race::new("Dwarf".to_string());
         let mut starting_class = Class::new("Rogue".to_string(), Dice::D6, 3);
-        let subclass = starting_class.create_subclass("Thief".to_string());
+        starting_class.create_subclass("Thief".to_string());
         let item = Item::new("Greataxe".to_string());
-        let base_stats = Stats::new();
         
         data.race_list.insert(race.id, race);
         data.class_list.insert(starting_class.id, starting_class);
@@ -128,8 +127,6 @@ mod tests {
         data.class_list.insert(starting_class.id.clone(), starting_class);
         data.race_list.insert(race.id.clone(), race);
     
-        let base_stats = Stats::new();
-
         let mut character = Character::new("Winston".to_string());
         
         data.get_class_options().apply_option(&mut character, 0);
@@ -155,8 +152,8 @@ mod tests {
         let dragonborn = Race::new("Dragonborn".to_string());
         let warforged = Race::new("Warforged".to_string());
         let mut clreic = Class::new("cleric".to_string(), Dice::D8, 1);
-        let forge = clreic.create_subclass("Forge domain".to_string());
-        let life = clreic.create_subclass("Life domain".to_string());
+        clreic.create_subclass("Forge domain".to_string());
+        clreic.create_subclass("Life domain".to_string());
     
         let mut data = Data::new();
         data.race_list.insert(dragonborn.id, dragonborn);

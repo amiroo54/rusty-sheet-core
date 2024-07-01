@@ -1,5 +1,4 @@
 use crate::mods::{*};
-use crate::Data;
 pub trait Actionable
 {
     fn get_actions(&self) -> Vec<&Action>;
