@@ -14,14 +14,14 @@ pub struct Character
     #[serde(skip_serializing, skip_deserializing)]
     pub race: Option<Race>,
 
-    race_id: Uuid,
+    pub race_id: Uuid,
     
     pub classes: Vec<PlayerClass>,
         
     #[serde(skip_serializing, skip_deserializing)]
     pub inventory: Vec<Item>,
     
-    item_ids: Vec<Uuid>,
+    pub item_ids: Vec<Uuid>,
 
     pub hp: i32,
     pub ac: u8,
@@ -56,7 +56,6 @@ impl Character {
             classes.push(PlayerClass::new(data.class_list[&class.class_id].clone()));
         }
         self.classes = classes;
-
         let race = data.race_list[&self.race_id].clone();
         self.race = Some(race);
 

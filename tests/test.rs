@@ -6,12 +6,17 @@ mod tests {
     fn test_character_creation() {
         let race = Race::new("Elf".to_string());
         let starting_class = Class::new("Fighter".to_string(), Dice::D8, 3);
-        let base_stats = Stats::new();
+        
+        let mut data = Data::new();
+        data.race_list.insert(race.id.clone(), race);
+        data.class_list.insert(starting_class.id.clone(), starting_class);        
 
-        let character = Character::new("Winston".to_string(), race, starting_class, base_stats);
+        let mut character = Character::new("Winston".to_string());
+        data.get_class_options().apply_option(&mut character, 0);
+        data.get_race_options().apply_option(&mut character, 0);
         
         assert_eq!(character.name, "Winston");
-        assert_eq!(character.race.name, "Elf");
+        assert_eq!(character.race.unwrap().name, "Elf");
         assert_eq!(character.classes[0].class.name, "Fighter");
         assert_eq!(character.base_stat.strength, 10);
         assert_eq!(character.base_stat.dexterity, 10);
@@ -33,12 +38,17 @@ mod tests {
         let subclass = starting_class.create_subclass("Thief".to_string());
         let item = Item::new("Greataxe".to_string());
         let base_stats = Stats::new();
-        let character = Character::new("Mobin".to_string(), race.clone(), starting_class.clone(), base_stats);
-
+        
         data.race_list.insert(race.id, race);
         data.class_list.insert(starting_class.id, starting_class);
         data.item_list.insert(item.id, item);
+        
+        let mut character = Character::new("Mobin".to_string());
+        data.get_class_options().apply_option(&mut character, 0);
+        data.get_race_options().apply_option(&mut character, 0);
+        
         data.character_list.insert(character.id, character);
+
 
         data.save_file(&temp_dir.join("Player's Handbook.sheet"));
         data.save_characters(&temp_dir.join("characters.char"));
@@ -71,8 +81,8 @@ mod tests {
         let default_character = Character::default();
         
         assert_eq!(default_character.name, "");
-        assert_eq!(default_character.race.name, "");
-        assert_eq!(default_character.classes[0].class.name, "");
+        assert!(default_character.race.is_none(), "race is not None");
+        assert_eq!(default_character.classes.len(), 0);
         assert_eq!(default_character.base_stat.strength, 10);
         assert_eq!(default_character.base_stat.dexterity, 10);
     }
@@ -90,8 +100,14 @@ mod tests {
         class_actions.push(Action::new("You know Druidic, the secret language of druids. You can speak the language and use it to leave hidden messages. You and others who know this language automatically spot such a message. Others spot the message's presence with a successful DC 15 Wisdom (Perception) check but can't decipher it without magic.".to_string(), 1, ActionType::Trait));
         class_actions.push(Action::new("Starting at 2nd level, you can use your action to magically assume the shape of a beast that you have seen before. You can use this feature twice. You regain expended uses when you finish a short or long rest.".to_string(), 2, ActionType::Action));
         class.actions = class_actions;
+
+        let mut data = Data::new();
+        data.race_list.insert(race.id.clone(), race);
+        data.class_list.insert(class.id, class);
         
-        let mut character = Character::new("Fox".to_string(), race, class, Stats::new());
+        let mut character = Character::new("Fox".to_string());
+        data.get_class_options().apply_option(&mut character, 0);
+        data.get_race_options().apply_option(&mut character, 0);
         character.classes[0].lvl_up();
         assert_eq!(character.get_possible_actions().len(), 3);
     
@@ -107,10 +123,16 @@ mod tests {
         let mut starting_class = Class::new("Paladin".to_string(), Dice::D8, 3);
         starting_class.create_subclass("Devotion".to_string());
         starting_class.create_subclass("Oathbreaker".to_string());
-        
+
+        let mut data: Data = Data::new();
+        data.class_list.insert(starting_class.id.clone(), starting_class);
+        data.race_list.insert(race.id.clone(), race);
+    
         let base_stats = Stats::new();
 
-        let mut character = Character::new("Winston".to_string(), race, starting_class, base_stats);
+        let mut character = Character::new("Winston".to_string());
+        
+        data.get_class_options().apply_option(&mut character, 0);
         
 
         let first_choices = character.classes[0].lvl_up();
@@ -140,7 +162,7 @@ mod tests {
         data.race_list.insert(dragonborn.id, dragonborn);
         data.race_list.insert(warforged.id, warforged);
         data.class_list.insert(clreic.id, clreic);
-
+        
         let options = data.get_race_options();
         assert_eq!(options.options.len(), 2);
 

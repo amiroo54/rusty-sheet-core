@@ -122,6 +122,7 @@ impl Data {
             let binding = race.clone().1.clone();
             let effect = |char: &mut Character|
             {
+                char.race_id = binding.id.clone();
                 char.race = Some(binding);
             };
             let opt = ChoiceOption
